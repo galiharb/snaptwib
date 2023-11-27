@@ -1,0 +1,13 @@
+flask
+gunicorn
+Pillow
+flask-sqlalchemy
+mysql-connector-python
+flask_migrate
+pymysql
+cryptography
+python-dotenv
+requests
+moviepy
+ffprobe-python
+flask_caching

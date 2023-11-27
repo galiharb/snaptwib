@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main">
+    <div class="bg-header text-center text-dark p-2">
+        <a href="/" class="text-decoration-none text-muted font-weight-bold">
+            <h2>snaptwib.com</h2>
+        </a>
+    </div>
+    <div class="container justify-content-center align-items-center text-center">
+        {% if pesan %}
+        <div class="text-center mt-5">
+            <img src="{{ url_for('static', filename='img/galih.gif') }}" class="w-25 text-center" alt="">
+            <br>  
+            {{ pesan }}
+        </div>
+        {% else %}
+        <div class="upload-foto mt-5">
+            <h4>{{ twibbons.title_twibbon }}</h4>
+            <input type="file" id="cover-photo-upload" accept="image/*" hidden>
+            <button id="buttonid" type="button" class="btn btn-primary w-100 mt-4 button-kuning">
+                <i class="bi bi-camera"></i> Upload Gambar
+            </button>
+            <button id="save-button" class="btn btn-primary w-100 mt-4 button-kuning" type="button" hidden>Download</button>
+            <p id="atur-posisi" class="mt-4" hidden>Silahkan atur posisi gambar anda dan tekan download jika sudah selesai</p>
+            <canvas id="cover-photo-canvas" class="mt-2" width="1080" height="1920" hidden></canvas>
+        </div>
+        <script>
+            document.getElementById('buttonid').addEventListener('click', openDialog);
+        
+            function openDialog() {
+                document.getElementById('cover-photo-upload').click();
+        
+                // Listen for changes to the input field
+                document.getElementById('cover-photo-upload').addEventListener('change', function () {
+                    // Replace the input element with the button element
+                    var button = document.createElement('button');
+                    button.setAttribute('id', 'save-button');
+                    button.setAttribute('class', 'btn btn-primary w-100 mt-4 button-kuning');
+                    button.setAttribute('type', 'button');
+                    button.innerHTML = 'Download';
+                    document.getElementById('buttonid').parentNode.replaceChild(button, document.getElementById('buttonid'));
+        
+                    // Show the button element
+                    document.getElementById('save-button').hidden = false;
+                    document.getElementById('atur-posisi').hidden = false;
+                    document.getElementById('cover-photo-canvas').hidden = false;
+                });
+            }
+        
+            const canvas = document.getElementById('cover-photo-canvas');
+            const ctx = canvas.getContext("2d");
+            const upload = document.getElementById("cover-photo-upload");
+            // const preview = document.getElementById("cover-photo-preview");
+            const saveButton = document.getElementById("save-button");
+        
+            const aspectRatio = canvas.width / canvas.height;
+            const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            const maxWidth = viewportWidth * 0.8;
+            const maxHeight = viewportHeight * 0.8;
+            const maxAspectRatio = maxWidth / maxHeight;
+            let width, height;
+            
+            if (aspectRatio > maxAspectRatio) {
+                width = maxWidth;
+                height = width / aspectRatio;
+            } else {
+                height = maxHeight;
+                width = height * aspectRatio;
+            }
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+        
+            let scale = 1;
+            let isZooming = false;
+            let isDragging = false;
+            let dragStart = {
+                x: 0,
+                y: 0
+            };
+            let translate = {
+                x: 0,
+                y: 0
+            };
+        
+            let img = new Image();
+            let watermark = new Image(); // New line to load watermark images
+        
+            // Load the watermark image
+            watermark.crossOrigin = "anonymous";
+            img.crossOrigin = "anonymous";
+            watermark.src = '/twb/{{ twibbons.id_twibbon }}.png';
+            img.src = watermark.src;
+            upload.addEventListener("change", (event) => {
+                img.src = URL.createObjectURL(event.target.files[0]);
+            });
+        
+            function watermarking(opacity = 0.5) {
+                const margin = 0;
+                const watermarkWidth = canvas.width; // Set the width of the watermark to 20% of the canvas width
+                const watermarkHeight = watermarkWidth * (watermark.naturalHeight / watermark.naturalWidth); // Scale the height proportionally to the width
+                const x = canvas.width - watermarkWidth - margin; // Position the watermark at the right margin of the canvas
+                const y = canvas.height - watermarkHeight - margin; // Position the watermark at the bottom margin of the canvas
+                ctx.globalAlpha = opacity;
+                ctx.drawImage(watermark, x, y, watermarkWidth, watermarkHeight);
+                ctx.globalAlpha = 1;
+            }
+        
+            img.onload = function () {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                scale = 1; // reset the scale
+                translate = {
+                    x: 0,
+                    y: 0
+                }; // reset translate to {x: 0, y: 0}
+        
+                watermarking();
+        
+                if (img.src == watermark.src) {
+                    img.src = '';
+                }
+            };
+        
+            canvas.addEventListener("touchstart", (event) => {
+                if (event.touches.length === 2) {
+                    const touch1 = event.touches[0];
+                    const touch2 = event.touches[1];
+        
+                    isZooming = true;
+                    initialDistance = distance(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
+                    initialScale = scale;
+                } else {
+                    isDragging = true;
+                    const touch = event.touches[0];
+                    dragStart = {
+                        x: touch.clientX,
+                        y: touch.clientY
+                    };
+                }
+            });
+        
+            canvas.addEventListener("touchmove", (event) => {
+                event.preventDefault();
+        
+                if (isZooming && event.touches.length === 2) {
+                    const touch1 = event.touches[0];
+                    const touch2 = event.touches[1];
+        
+                    const currentDistance = distance(touch1.clientX, touch1.clientY, touch2.clientX, touch2.clientY);
+                    const scaleFactor = currentDistance / initialDistance;
+                    scale = initialScale * scaleFactor;
+        
+                    // Limit the scale to between 0.1 and 5
+                    scale = Math.min(Math.max(0.1, scale), 5);
+        
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.translate(translate.x, translate.y);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.restore();
+        
+                    watermarking();
+                } else if (isDragging) {
+                    const touch = event.touches[0];
+                    const x = touch.clientX - dragStart.x;
+                    const y = touch.clientY - dragStart.y;
+                    const z = 1.25 // customize cursor speed (default: 3.5)
+        
+                    translate.x += x * z;
+                    translate.y += y * z;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.translate(translate.x, translate.y);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.restore();
+        
+                    watermarking();
+                    dragStart = {
+                        x: touch.clientX,
+                        y: touch.clientY
+                    };
+                }
+            });
+        
+            canvas.addEventListener("touchend", () => {
+                watermarking(1);
+                isDragging = false;
+                isZooming = false;
+                // preview.src = canvas.toDataURL();
+            });
+        
+            function distance(x1, y1, x2, y2) {
+                return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            }
+        
+            canvas.addEventListener("mousedown", (event) => {
+                isDragging = true;
+                dragStart = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            });
+        
+            canvas.addEventListener("mousemove", (event) => {
+                if (isDragging) {
+                    const x = event.clientX - dragStart.x;
+                    const y = event.clientY - dragStart.y;
+                    const z = 3.5 // customize cursor speed (default: 3.5)
+        
+                    translate.x += x * z;
+                    translate.y += y * z;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.translate(translate.x, translate.y);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.restore();
+        
+                    watermarking();
+                    dragStart = {
+                        x: event.clientX,
+                        y: event.clientY
+                    };
+                }
+            });
+        
+            canvas.addEventListener("mouseup", () => {
+                isDragging = false;
+                // preview.src = canvas.toDataURL();
+            });
+        
+            canvas.addEventListener("mousewheel", (event) => {
+                event.preventDefault();
+        
+                // adjust the zoom speed (default: 0.01)
+                const zoomSpeed = 0.025;
+                const zoomIn = event.deltaY < 0;
+        
+                if (zoomIn) {
+                    scale += zoomSpeed;
+                } else {
+                    scale -= zoomSpeed;
+                }
+        
+                // Limit the scale to between 0.1 and 5
+                scale = Math.min(Math.max(0.1, scale), 5);
+        
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(translate.x, translate.y);
+                ctx.scale(scale, scale);
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                ctx.restore();
+        
+                watermarking();
+            });
+        
+            document.addEventListener("click", function (event) {
+                if (event.target && event.target.id === "save-button") {
+                    watermarking(1);
+                    const dataURL = canvas.toDataURL();
+                    console.log(dataURL);
+                    const a = document.createElement("a");
+                    a.href = dataURL;
+                    a.download = "{{ twibbons.title_twibbon }}.png";
+                    a.target = "_blank";
+                    a.click();
+                }
+            });      
+        </script>
+        
+        {% endif %}
+        <br><br><br><br><br>
+    </div>
+</div>
+{% endblock %}

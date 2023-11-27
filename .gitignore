@@ -1,0 +1,10 @@
+.env
+/datatwibbon/html/*
+/datavideo/html/*
+/migrations
+/datatwibbon/*
+/datatwibbon/*
+/__pychache__
+/app/__pychache__
+datatwibbon/docker-compose.yml
+datavideo/docker-compose.yml

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main">
+  <div class="bg-header text-center text-dark p-2">
+    <a href="/" class="text-decoration-none text-muted font-weight-bold">
+      <h2>snaptwib.com</h2>
+    </a>
+  </div>
+  <div class="container h-100 mt-5 d-flex justify-content-center align-items-center">
+    <div class="text-center">
+      <img src="{{ url_for('static', filename='img/photo.png') }}" class="w-25 text-center rounded-circle" alt="">
+      <br>
+      <h4>{{ username }}</h4>
+      {% if pngwarning %}
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
+          <use xlink:href="#exclamation-triangle-fill" />
+        </svg>
+        {{ pngwarning }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
+      {% if pngsuccess %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
+          <use xlink:href="#exclamation-triangle-fill" />
+        </svg>
+        {{ pngsuccess }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
+      <hr>
+      <h3 class="mb-3">Tunjukkan kreativitas anda !!!</h3>
+      <form method="POST" action="/kreator/{{ username }}/upload" enctype="multipart/form-data">
+        <input type="text" name="judul" class="form-control" id="exampleFormControlInput1" placeholder="Judul Twibbon">
+        <input type="file" name="file" id="cover-photo-upload" accept="image/png" hidden>
+        <input id="buttonid" type="button" class="btn btn-primary w-100 mt-2" value="Plih Twibbon" />
+      </form>
+    </div>
+    <script>
+      // get the elements
+      const coverPhotoUpload = document.getElementById('cover-photo-upload');
+      const buttonId = document.getElementById('buttonid');
+
+      // add event listener to the button
+      buttonId.addEventListener('click', () => {
+        // open file chooser dialog
+        coverPhotoUpload.click();
+      });
+
+      // add event listener to the file input element
+      coverPhotoUpload.addEventListener('change', () => {
+        // get the form element
+        const form = document.querySelector('form');
+
+        // create a new submit button
+        const submitButton = document.createElement('input');
+        submitButton.type = 'submit';
+        submitButton.value = 'Upload !!!';
+        submitButton.classList.add('btn', 'btn-primary', 'w-100', 'mt-2');
+
+        // replace the old button with the new submit button
+        form.replaceChild(submitButton, buttonId);
+      });
+
+    </script>
+  </div>
+  <div class="faq mt-4 mb-5">
+    <div class="container">
+      <h2>#Ketentuan SnapTwib</h2>
+      <div class="card">
+        <div class="card-body">
+          Twibbon berformat png
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          Size Twibbon 1080 x 1920 pixel
+        </div>
+      </div>
+    </div>
+    <br><br><br><br><br>
+  </div>
+  <!-- konten -->
+</div>
+
+{% endblock %}

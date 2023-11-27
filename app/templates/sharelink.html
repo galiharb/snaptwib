@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main">
+    <div class="bg-header text-center text-dark p-2">
+        <a href="/" class="text-decoration-none text-muted font-weight-bold">
+            <h2>snaptwib.com</h2>
+        </a>
+    </div>
+    <div class="container mt-5 d-flex aligns-items-center justify-content-center">
+        {% if twibbons %}
+        <div class="card mb-3" style="max-width: 540px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ twibbons.path_twibbon }}" class="img-fluid rounded-start">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ twibbons.title_twibbon }}</h5>
+                        <a href="/kreator/{{ twibbons.username }}" class="text-muted text-decoration-none">
+                            <p class="card-text"><i class="bi bi-person-bounding-box"></i> {{ twibbons.username }}</p>
+                        </a>
+                        <hr>
+                        <p class="card-text"><small class="text-muted">Pilih Mode Twibbon : </small></p>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" class="btn bg-header m-1 w-50" onclick="window.location.href='{{ url }}/{{ twibbons.id_twibbon }}/twibbonfoto';">
+                                <img src="{{ url_for('static', filename='img/twibbon-foto-button.jpg') }}"
+                                    style="width: 100%;" alt="">
+                            </button>
+                            <button type="button" class="btn bg-header m-1 w-50" onclick="window.location.href='{{ url }}/{{ twibbons.id_twibbon }}/twibbonvideo';">
+                                <img src="{{ url_for('static', filename='img/twibbon-video-button.gif') }}"
+                                    style="width: 100%;" alt="">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <br><br><br><br><br>
+    <!-- konten -->
+</div>
+{% endblock %}

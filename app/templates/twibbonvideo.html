@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="main">
+    <div class="bg-header text-center text-dark p-2">
+        <a href="/" class="text-decoration-none text-muted font-weight-bold">
+            <h2>snaptwib.com</h2>
+        </a>
+    </div>
+    <div class="container mt-5 justify-content-center align-items-center text-center">
+        {% if error_limit %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                <use xlink:href="#check-circle-fill" />
+            </svg>
+            {{ error_limit }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                <use xlink:href="#check-circle-fill" />
+            </svg>
+            {{ success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg mt-4 mb-4" onclick="window.location.href='{{ download }}';">
+            <i class="bi bi-box-arrow-down"></i>
+            Download
+        </button>
+        {% endif %}
+        {% if error %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                <use xlink:href="#check-circle-fill" />
+            </svg>
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+    </div>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h4>Ketentuan Twibbon Video</h4>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Durasi video maksimal adalah 15 detik</li>
+                    <li class="list-group-item">Proses render twibbon dengan video lumayan lama (maksimal 5 menit) harap
+                        bersabar ya</li>
+                    <li class="list-group-item">Kenapa seperti ini ? belum sanggup sewa server mahal-mahal gan :)</li>
+                    <li class="list-group-item">
+                        <a href="https://saweria.co/galiharb" target="_blank">support aplikasi ini agar terus
+                            berkembang</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <h4>Nama Twibbon : </h4>
+        <p class="text-center lead"> {{ twibbons.title_twibbon }}</p>
+    </div>
+
+    <div class="container mt-3 justify-content-center align-items-center text-center">
+        <form method="POST" action="/{{ twibbons.id_twibbon }}/twibbonvideo" enctype="multipart/form-data">
+            <input type="file" id="videoid" name="file" accept="Video/*" hidden>
+            <button type="button" id="buttonid" class="btn btn-primary btn-lg">
+                <i class="bi bi-camera-reels"></i>
+                Upload Video
+            </button>
+            <button id="submit-btn" type="submit" class="btn btn-primary w-100 mt-4" type="button" hidden>Proses dan
+                download
+            </button>
+        </form>
+    </div>
+
+    <div class="container mt-3">
+        <center>
+            <img id="submit-img" src="{{ url_for('static', filename='img/loading.gif') }}" style="display:none;">
+        </center>
+    </div>
+    <br><br><br><br><br>
+    <!-- konten -->
+</div>
+<script>
+    document.getElementById('buttonid').addEventListener('click', openDialog);
+
+    function openDialog() {
+        document.getElementById('videoid').click();
+    }
+
+    document.getElementById('videoid').addEventListener('change', showProcessButton);
+
+    function showProcessButton() {
+        const processButton = document.querySelector('.btn.w-100.mt-4');
+        processButton.removeAttribute('hidden');
+
+        const uploadButton = document.querySelector('#buttonid');
+        const newButton = document.createElement('button');
+        newButton.type = 'button';
+        newButton.className = 'btn btn-success btn-lg';
+        newButton.innerHTML = '<i class="bi bi-check-lg"></i> File Selected';
+        uploadButton.parentNode.replaceChild(newButton, uploadButton);
+    }
+
+    const submitBtn = document.getElementById("submit-btn");
+    const submitImg = document.getElementById("submit-img");
+
+    submitBtn.addEventListener("click", () => {
+        setTimeout(() => {
+            submitBtn.style.display = "none";
+            submitImg.style.display = "block";
+        }, 10);
+    });
+
+</script>
+{% endblock %}

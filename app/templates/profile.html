@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="main">
+    <div class="bg-header text-center text-dark p-2">
+        <a href="/" class="text-decoration-none text-muted font-weight-bold">
+            <h2>snaptwib.com</h2>
+        </a>
+    </div>
+    <div class="container h-100 mt-5 d-flex justify-content-center align-items-center">
+        <div class="text-center">
+            <img src="{{ url_for('static', filename='img/photo.png') }}" class="w-25 text-center rounded-circle" alt="">
+            <br>
+            <h4>{{ username }}</h4>
+            {% if upload_button %}
+            <a href="/kreator/{{ username }}/upload">
+                <button type="button" class="btn btn-outline-success">Upload Twibbon</button>
+            </a>
+            <br>
+            <a href="/logout">
+                <button type="button" class="btn btn-outline-danger mt-2 mb-4">logout</button>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="container mt-2">
+        <hr>
+        {% if no_twibbons %}
+        <h4 class="text-muted">{{ no_twibbons }}</h4>
+        {% endif %}
+        <div class="grid">
+            {% for twibbon in twibbons %}
+            {% if not upload_button %}
+            <!-- modal -->
+            <div class="modal fade" id="{{ twibbon.id_twibbon }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">{{ twibbon.title_twibbon }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Pilih Mode Twibbon :</p>
+                            <div class="d-flex justify-content-center">
+                                <button type="button" class="btn bg-header m-1 w-50"  onclick="window.location.href='{{url}}/{{ twibbon.id_twibbon }}/twibbonfoto';">
+                                    <img src="{{ url_for('static', filename='img/twibbon-foto-button.jpg') }}"
+                                        style="width: 100%;" alt="">
+                                </button>
+                                <button type="button" class="btn bg-header m-1 w-50" onclick="window.location.href='{{url}}/{{ twibbon.id_twibbon }}/twibbonvideo';">
+                                    <img src="{{ url_for('static', filename='img/twibbon-video-button.gif') }}"
+                                        style="width: 100%;" alt="">
+                                </button>
+                            </div>
+                            <hr>
+                            sharelink gan :
+                            <div class="input-group mt-3">
+                                <span onclick="copyToClipboard_{{ twibbon.id_twibbon }}()" class="input-group-text">
+                                    <i class="bi bi-clipboard"></i>
+                                </span>
+                                <label tabindex="0" class="form-control">
+                                    <input class="form-control" type="text" id="url{{ twibbon.id_twibbon }}"
+                                        value="{{url}}/{{ twibbon.id_twibbon }}"
+                                        aria-label="readonly input example" readonly>
+                                </label>
+                            </div>
+                            <script>
+                                function copyToClipboard_{{ twibbon.id_twibbon }}() {
+                                    var url = document.getElementById('url{{ twibbon.id_twibbon }}');
+                                    url.select();
+                                    document.execCommand('copy');
+                                }
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- end modal -->
+            {% endif %}
+            <!-- start konten twibbon -->
+            <div class="item" data-bs-toggle="modal" data-bs-target="#{{ twibbon.id_twibbon }}">
+                <img src="/twb/{{ twibbon.id_twibbon }}.png">
+                <div class="card-body mt-4">
+                    <h4 class="text-monospace text-muted">{{ twibbon.title_twibbon }}</h4>
+                    <a href="/kreator/{{ twibbon.username }}" class="text-muted text-decoration-none">
+                        <p class="card-text"><i class="bi bi-person-bounding-box"></i> {{ twibbon.username }}</p>
+                    </a>
+                </div>
+            </div>
+            <!-- end of konten twibbon -->
+            {% endfor %}
+        </div>
+
+        <br><br><br><br><br>
+    </div>
+
+    <!-- konten -->
+</div>
+
+
+{% endblock %}
